@@ -1,5 +1,4 @@
-
-const express = require('express');
+const express=require('express');
 const http=require('http');
 const {Server}=require('socket.io');
 const QRCode=require('qrcode');
@@ -17,12 +16,27 @@ function supportWh(prompt){
 for(const set of Object.values(SETS)){
   for(const question of set.questions)question.prompt=supportWh(question.prompt);
 }
+// Attach the exact illustrated workbook extracts to each reading question.
+const extractNames=['mountain','beach','market','temple','city','river'];
+const extractStarts={
+ mountain:'Taiwan has high mountains.',
+ beach:'The beaches in Taiwan',
+ market:'Markets are so much fun!',
+ temple:'There are many beautiful temples',
+ city:'Taipei is the capital city.',
+ river:'Rivers make Taiwan even more beautiful.'
+};
+for(const set of Object.values(SETS))for(const q of set.questions){
+ q.images=extractNames.filter(name=>q.text.includes(extractStarts[name]));
+ // The final invitation references the entire blog; offer all six illustrations.
+ if(!q.images.length)q.images=[...extractNames];
+}
 const rooms=new Map();
 function code(){let c;do{c=String(Math.floor(100000+Math.random()*900000))}while(rooms.has(c));return c}
 function ack(cb,value){if(typeof cb==='function')cb(value)}
 function stop(r){if(r.timer){clearInterval(r.timer);r.timer=null}}
 function players(r){return [...r.players.values()].map(p=>({name:p.name,score:p.score,correct:p.correct,connected:p.connected}))}
-function state(r){const q=SETS[r.set].questions[r.index];return {code:r.code,phase:r.phase,set:r.set,setTitle:SETS[r.set].title,round:r.round,index:r.index,total:SETS[r.set].questions.length,remaining:r.remaining,answered:r.answered.size,players:players(r),passage:q?.text||'',prompt:q?.prompt||'',choices:q?.choices||[],answer:r.phase==='reveal'?q.answer:null,evidence:r.phase==='reveal'?q.evidence:null}}
+function state(r){const q=SETS[r.set].questions[r.index];return {code:r.code,phase:r.phase,set:r.set,setTitle:SETS[r.set].title,round:r.round,index:r.index,total:SETS[r.set].questions.length,remaining:r.remaining,answered:r.answered.size,players:players(r),passage:q?.text||'',images:q?.images||[],prompt:q?.prompt||'',choices:q?.choices||[],answer:r.phase==='reveal'?q.answer:null,evidence:r.phase==='reveal'?q.evidence:null}}
 function emit(r){io.to(r.code).emit('state',state(r))}
 function reveal(r){stop(r);r.phase='reveal';emit(r)}
 function tick(r){stop(r);r.timer=setInterval(()=>{r.remaining--;if(r.remaining<=0){r.remaining=0;reveal(r)}else emit(r)},1000)}
