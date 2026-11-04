@@ -1,0 +1,24 @@
+const express=require('express');const http=require('http');const {Server}=require('socket.io');const QRCode=require('qrcode');const crypto=require('crypto');
+const app=express(),server=http.createServer(app),io=new Server(server);app.use(express.static('public'));
+const rooms=new Map();const WORDS={places:['mountain','beach','market','temple','city','river'],activities:['swim','surf','snacks','clothes','pray','bike','walk','shop','views','games'],blog:['Yushan','capital','friendly','temple','river','market','mountain','beach']};
+function code(){let c;do{c=String(Math.floor(100000+Math.random()*900000))}while(rooms.has(c));return c}
+function players(r){return [...r.players.values()].map(p=>({name:p.name,score:p.score,correct:p.correct,connected:p.connected}))}
+function emit(r){io.to(r.code).emit('state',{code:r.code,phase:r.phase,round:r.round,wordSet:r.wordSet,words:r.words,players:players(r),remaining:r.remaining,question:r.question,questionIndex:r.questionIndex,questionsTotal:r.words.length,answered:r.answered.size})}
+function stopTimer(r){if(r.timer){clearInterval(r.timer);r.timer=null}}
+function clean(s){return String(s||'').trim().slice(0,24).replace(/[<>]/g,'')}
+function ack(cb,o){if(typeof cb==='function')cb(o)}
+io.on('connection',s=>{
+ s.on('create',(_,cb)=>{const c=code(),token=crypto.randomBytes(18).toString('hex');const r={code:c,token,host:s.id,players:new Map(),phase:'lobby',round:0,wordSet:'places',words:[],question:null,questionIndex:0,remaining:0,answered:new Set(),timer:null};rooms.set(c,r);s.join(c);s.data={code:c,host:true};ack(cb,{ok:true,code:c,token});emit(r)});
+ s.on('restoreHost',({code:c,token},cb)=>{const r=rooms.get(c);if(!r||r.token!==token)return ack(cb,{error:'Host session not found'});r.host=s.id;s.join(c);s.data={code:c,host:true};ack(cb,{ok:true});emit(r)});
+ s.on('join',({code:c,name},cb)=>{const r=rooms.get(String(c||''));if(!r)return ack(cb,{error:'Room not found'});if(r.phase==='finished')return ack(cb,{error:'Game has ended'});name=clean(name);if(!name)return ack(cb,{error:'Enter a nickname'});if([...r.players.values()].some(p=>p.name.toLowerCase()===name.toLowerCase()&&p.connected))return ack(cb,{error:'Nickname already in use'});const id=crypto.randomBytes(12).toString('hex');r.players.set(id,{name,score:0,correct:0,connected:true,socket:s.id});s.join(c);s.data={code:c,id};ack(cb,{ok:true,id,code:c});emit(r)});
+ s.on('rejoin',({code:c,id},cb)=>{const r=rooms.get(c),p=r?.players.get(id);if(!p)return ack(cb,{error:'Session not found'});p.socket=s.id;p.connected=true;s.join(c);s.data={code:c,id};ack(cb,{ok:true});emit(r)});
+ s.on('start',({set,duration},cb)=>{const r=rooms.get(s.data?.code);if(!r||r.host!==s.id)return ack(cb,{error:'Host only'});stopTimer(r);r.wordSet=WORDS[set]?set:'places';r.words=[...WORDS[r.wordSet]].sort(()=>Math.random()-.5);r.questionIndex=0;r.round++;r.phase='question';r.duration=Math.min(60,Math.max(10,Number(duration)||20));r.answered=new Set();r.question=r.words[0];r.remaining=r.duration;emit(r);tick(r);ack(cb,{ok:true})});
+ function tick(r){stopTimer(r);r.timer=setInterval(()=>{r.remaining--;if(r.remaining<=0){stopTimer(r);r.phase='reveal';io.to(r.code).emit('reveal',{answer:r.question});}emit(r)},1000)}
+ s.on('answer',({answer},cb)=>{const r=rooms.get(s.data?.code),p=r?.players.get(s.data?.id);if(!r||!p||r.phase!=='question'||r.answered.has(s.data.id))return ack(cb,{error:'Not accepting answers'});r.answered.add(s.data.id);const correct=String(answer).toLowerCase()===String(r.question).toLowerCase();if(correct){p.score+=100+Math.round(r.remaining/r.duration*50);p.correct++}ack(cb,{ok:true,correct});emit(r);if(r.answered.size >= [...r.players.values()].filter(p=>p.connected).length){stopTimer(r);r.phase='reveal';io.to(r.code).emit('reveal',{answer:r.question});emit(r)}});
+ s.on('next',(_,cb)=>{const r=rooms.get(s.data?.code);if(!r||r.host!==s.id)return ack(cb,{error:'Host only'});stopTimer(r);r.questionIndex++;if(r.questionIndex>=r.words.length){r.phase='finished';r.question=null}else{r.phase='question';r.question=r.words[r.questionIndex];r.answered=new Set();r.remaining=r.duration;tick(r)}emit(r);ack(cb,{ok:true})});
+ s.on('end',()=>{const r=rooms.get(s.data?.code);if(r&&r.host===s.id){stopTimer(r);r.phase='finished';emit(r)}});
+ s.on('disconnect',()=>{const r=rooms.get(s.data?.code);const p=r?.players.get(s.data?.id);if(p&&p.socket===s.id){p.connected=false;emit(r)}})
+});
+app.get('/qr/:code.png',async(req,res)=>{res.type('png');try{res.send(await QRCode.toBuffer(`${req.protocol}://${req.get('host')}/?join=${encodeURIComponent(req.params.code)}`,{width:400,margin:2}))}catch(e){res.sendStatus(500)}});
+setInterval(()=>{for(const [c,r] of rooms)if(r.phase==='finished'&&!r.players.size){stopTimer(r);rooms.delete(c)}},3600000);
+server.listen(process.env.PORT||3000,()=>console.log('Amazing Taiwan Live running'));
