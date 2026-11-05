@@ -191,6 +191,24 @@ footer{color:#d7c8ff;font-size:16px}
  .teacher-choice.dimmed{opacity:.5}
 }
 
+
+/* Reading and assessment refinements: preserve all original content. */
+.question .focus-word{color:#dc173b;font-weight:950;text-decoration:none}
+/* Let illustrations occupy their reading panels without cropping any text. */
+.teacher-reading .extracts{width:100%;min-height:min(55vh,460px);padding:5px;overflow:hidden}
+.teacher-reading .extracts:not(.six) img{display:block;width:100%;height:min(55vh,460px);max-height:none;object-fit:contain;object-position:center}
+.teacher-reading .extracts.six{min-height:0}
+.teacher-reading .extracts.six img{width:100%;height:min(22vh,180px);max-height:none;object-fit:contain}
+#playerextracts:not(.six){grid-template-columns:minmax(0,1fr)}
+#playerextracts:not(.six) img{width:100%;height:min(55vh,490px);max-height:none;object-fit:contain}
+@media(min-width:850px) and (max-height:760px){
+ .teacher-reading .extracts{min-height:min(43vh,340px)}
+ .teacher-reading .extracts:not(.six) img{height:min(43vh,340px)}
+}
+@media(max-width:849px){
+ .teacher-reading .extracts{min-height:0}
+ .teacher-reading .extracts:not(.six) img{width:100%;height:min(48vh,400px);max-height:none}
+}
 </style></head><body><main>
 <header class="hero"><span class="eyebrow">🌏 WONDERFUL WORLD · UNIT 3</span><h1>Amazing Taiwan <strong>Reading Quest!</strong></h1><p class="muted">Read. Find. Win! ✨</p></header>
 <section id="landing" class="card"><span class="tag">READ · SCAN · CHOOSE</span><h2 style="margin-top:16px">Ready to explore Taiwan?</h2><p class="muted">Read the picture. Find the answer.</p><div class="flex"><button id="create">🎓 Host a game</button><button id="showjoin" class="secondary">📱 Join a game</button></div><div class="feature"><div>📍<b>Places</b><span class="muted">Find the place</span></div><div>🚲<b>Activities</b><span class="muted">Find the action</span></div><div>🧠<b>Blog Challenge</b><span class="muted">Think deeper</span></div></div></section>
@@ -213,6 +231,24 @@ function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 const extractAlt={mountain:'Taiwan has high mountains. Yushan is the highest mountain. The views are so beautiful!',beach:'The beaches in Taiwan are great for swimming, surfing, and relaxing in the sun!',market:'Markets are so much fun! You can find tasty snacks, clothes, games, and many interesting things.',temple:'There are many beautiful temples in Taiwan. People go there to pray and wish for good luck.',city:'Taipei is the capital city. It has tall buildings, great shops, and lots of exciting places to visit!',river:'Rivers make Taiwan even more beautiful. You can walk, bike, or just enjoy the nice view.'};
 function showExtracts(id,images){const el=$(id),names=(images||[]).filter(x=>Object.prototype.hasOwnProperty.call(extractAlt,x));const signature=names.join('|');if(el.dataset.signature===signature)return;el.dataset.signature=signature;el.classList.toggle('six',names.length>2);el.replaceChildren();for(const name of names){const img=document.createElement('img');img.src='/images/'+name+'.png';img.alt=extractAlt[name];img.loading='eager';img.title='Tap to enlarge';img.onclick=()=>{$('zoomimage').src=img.src;$('zoomimage').alt=img.alt;show('zoom',true)};el.appendChild(img)}}
 $('closezoom').onclick=()=>show('zoom',false);$('zoom').onclick=e=>{if(e.target===$('zoom'))show('zoom',false)};document.addEventListener('keydown',e=>{if(e.key==='Escape')show('zoom',false)});
+// Exact teacher-selected red vocabulary, keyed by challenge and question order.
+const focusVocabulary={
+ places:[['beautiful','views'],['place','surfing'],['find','clothes','games'],['wish','luck'],['tall buildings','great shops'],['walk','bike']],
+ activities:[['activity'],['find'],['do'],['two','activities'],['invite','enjoy'],['visitors','friend']],
+ blog:[['true'],['place','choose','surf'],['detail','market'],['linked','good luck'],['compares'],['readers','do','end']]
+};
+function renderFocusedQuestion(element,question,set,index){
+ const terms=(focusVocabulary[set]||[])[index]||[];
+ const ordered=[...terms].sort((a,b)=>b.length-a.length);
+ const pattern=ordered.length?new RegExp('(?<![A-Za-z])('+ordered.join('|')+')(?![A-Za-z])','gi'):null;
+ element.replaceChildren();
+ if(!pattern){element.textContent=question;return}
+ let last=0;for(const match of question.matchAll(pattern)){
+  const at=match.index;element.appendChild(document.createTextNode(question.slice(last,at)));
+  const span=document.createElement('span');span.className='focus-word';span.textContent=match[0];element.appendChild(span);last=at+match[0].length;
+ }
+ element.appendChild(document.createTextNode(question.slice(last)));
+}
 function renderHostChoices(s){
  const area=$('hostchoices');
  const signature=String(s.round)+'-'+String(s.index)+'-'+String(s.set);
@@ -233,8 +269,8 @@ function renderHostChoices(s){
  });
 }
 function render(s){if(s.code!==room)return;lastState=s;const phaseKey=s.round+'-'+s.index;const isNewQuestion=s.phase==='question'&&lastAnimatedQuestion!==phaseKey;const isNewReveal=s.phase==='reveal'&&lastRevealKey!==phaseKey;const isNewFinish=s.phase==='finished'&&lastFinishKey!==String(s.round);if(isNewQuestion){lastAnimatedQuestion=phaseKey;playCue('start')}if(isNewReveal){lastRevealKey=phaseKey;playCue('reveal');celebrate()}if(isNewFinish){lastFinishKey=String(s.round);playCue('reveal');celebrate()}const rank=[...s.players].sort((a,b)=>b.score-a.score);$('scores').innerHTML=rank.map((p,i)=>`<div class="score"><span>${i+1}. ${escapeHTML(p.name)} ${p.connected?'':'(offline)'}</span><b>${p.score} pts · ${p.correct} correct</b></div>`).join('')||'<p class="muted">Waiting for learners...</p>';
-if(role==='host'){document.body.classList.toggle('teacher-playing',s.phase==='question'||s.phase==='reveal');$('count').textContent=s.players.filter(p=>p.connected).length;show('lobby',s.phase==='lobby'||s.phase==='finished');show('hostgame',s.phase==='question'||s.phase==='reveal');$('challenge').textContent=s.setTitle;$('hosttimer').textContent=s.remaining+'s';$('hosttimer').classList.toggle('low',s.remaining<=10);$('progress').textContent=`Question ${s.index+1} of ${s.total} · ${s.answered} answered`;$('hostpassage').textContent=s.passage;showExtracts('hostextracts',s.images);$('hostquestion').textContent=s.prompt;renderHostChoices(s);if(isNewQuestion){animateOnce($('hostquestion'));animateOnce($('hostextracts'))}show('revealbox',s.phase==='reveal');show('next',s.phase==='reveal');if(s.phase==='reveal'){$('revealanswer').textContent='Answer: '+s.choices[s.answer];$('evidence').textContent='Evidence: '+s.evidence;if(isNewReveal){$('revealbox').classList.remove('reveal-pop');void $('revealbox').offsetWidth;$('revealbox').classList.add('reveal-pop')}}if(s.phase==='finished')$('lobby').querySelector('p').textContent='Challenge complete!'}
-if(role==='player'){show('waiting',s.phase==='lobby');show('play',s.phase==='question'||s.phase==='reveal');show('finish',s.phase==='finished');$('playerchallenge').textContent=s.setTitle;$('playtimer').textContent=s.remaining+'s';$('playtimer').classList.toggle('low',s.remaining<=10);$('playerprogress').textContent=`Question ${s.index+1} of ${s.total}`;$('playerpassage').textContent=s.passage;showExtracts('playerextracts',s.images);$('playerquestion').textContent=s.prompt;if(isNewQuestion){animateOnce($('playerquestion'));animateOnce($('playerextracts'))}const me=s.players.find(p=>p.name===$('playername').textContent);$('myscore').textContent=me?`${me.score} points · ${me.correct} correct answers`:'';const key=s.round+'-'+s.index;if(questionKey!==key){questionKey=key;answered=false;$('feedback').textContent='';$('choices').innerHTML='';s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="letter">${'ABCD'[i]}</span><span>${escapeHTML(choice)}</span>`;b.onclick=()=>{if(answered||lastState.phase!=='question')return;answered=true;b.classList.add('chosen');playCue('answer');socket.emit('answer',{choice:i},r=>{if(r.error){$('feedback').textContent=r.error;return}$('feedback').textContent=r.correct?'✅ Great scanning!':'Answer saved. Look for the evidence!';$('feedback').className='status center '+(r.correct?'success':'warning')})};$('choices').appendChild(b)})}Array.from($('choices').children).forEach((b,i)=>{b.disabled=answered||s.phase==='reveal';b.classList.toggle('right',s.phase==='reveal'&&i===s.answer)});if(s.phase==='reveal')$('feedback').textContent='Answer: '+s.choices[s.answer]+' · '+s.evidence}}
+if(role==='host'){document.body.classList.toggle('teacher-playing',s.phase==='question'||s.phase==='reveal');$('count').textContent=s.players.filter(p=>p.connected).length;show('lobby',s.phase==='lobby'||s.phase==='finished');show('hostgame',s.phase==='question'||s.phase==='reveal');$('challenge').textContent=s.setTitle;$('hosttimer').textContent=s.remaining+'s';$('hosttimer').classList.toggle('low',s.remaining<=10);$('progress').textContent=`Question ${s.index+1} of ${s.total} · ${s.answered} answered`;$('hostpassage').textContent=s.passage;showExtracts('hostextracts',s.images);renderFocusedQuestion($('hostquestion'),s.prompt,s.set,s.index);renderHostChoices(s);if(isNewQuestion){animateOnce($('hostquestion'));animateOnce($('hostextracts'))}show('revealbox',s.phase==='reveal');show('next',s.phase==='reveal');if(s.phase==='reveal'){$('revealanswer').textContent='Answer: '+s.choices[s.answer];$('evidence').textContent='Evidence: '+s.evidence;if(isNewReveal){$('revealbox').classList.remove('reveal-pop');void $('revealbox').offsetWidth;$('revealbox').classList.add('reveal-pop')}}if(s.phase==='finished')$('lobby').querySelector('p').textContent='Challenge complete!'}
+if(role==='player'){show('waiting',s.phase==='lobby');show('play',s.phase==='question'||s.phase==='reveal');show('finish',s.phase==='finished');$('playerchallenge').textContent=s.setTitle;$('playtimer').textContent=s.remaining+'s';$('playtimer').classList.toggle('low',s.remaining<=10);$('playerprogress').textContent=`Question ${s.index+1} of ${s.total}`;$('playerpassage').textContent=s.passage;showExtracts('playerextracts',s.images);renderFocusedQuestion($('playerquestion'),s.prompt,s.set,s.index);if(isNewQuestion){animateOnce($('playerquestion'));animateOnce($('playerextracts'))}const me=s.players.find(p=>p.name===$('playername').textContent);$('myscore').textContent=me?`${me.score} points · ${me.correct} correct answers`:'';const key=s.round+'-'+s.index;if(questionKey!==key){questionKey=key;answered=false;$('feedback').textContent='';$('choices').innerHTML='';s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="letter">${'ABCD'[i]}</span><span>${escapeHTML(choice)}</span>`;b.onclick=()=>{if(answered||lastState.phase!=='question')return;answered=true;b.classList.add('chosen');playCue('answer');socket.emit('answer',{choice:i},r=>{if(r.error){$('feedback').textContent=r.error;return}$('feedback').textContent=r.correct?'✅ Great scanning!':'Answer saved. Look for the evidence!';$('feedback').className='status center '+(r.correct?'success':'warning')})};$('choices').appendChild(b)})}Array.from($('choices').children).forEach((b,i)=>{b.disabled=answered||s.phase==='reveal';b.classList.toggle('right',s.phase==='reveal'&&i===s.answer)});if(s.phase==='reveal')$('feedback').textContent='Answer: '+s.choices[s.answer]+' · '+s.evidence}}
 
 // Original, synthesized sound cues; no external audio files or autoplay.
 let soundEnabled=false,audioContext=null,lastAnimatedQuestion='',lastRevealKey='',lastFinishKey='';
