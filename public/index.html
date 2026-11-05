@@ -134,12 +134,69 @@ footer{color:#d7c8ff;font-size:16px}
 @media(max-width:700px){main{padding:12px}.hero h1{font-size:clamp(34px,8vw,54px)}.card{padding:17px;border-width:3px;border-radius:24px}.feature{gap:10px}.feature>div{padding:15px}.extracts{padding:9px}.choice{min-height:84px}.question{font-size:clamp(27px,6vw,38px)}.timer{font-size:42px}#hostgame>.flex:first-child,#play>.flex:first-child{padding:12px}.hero .muted{font-size:18px}}
 @media(prefers-reduced-motion:reduce){.timer.low{animation:none}button{transition:none}}
 
+
+/* CLASSROOM WIDESCREEN — keep the original reading and four choices in one view */
+@media(min-width:850px){
+ body.teacher-playing main{max-width:1550px;padding:8px 20px 20px}
+ body.teacher-playing .hero{padding:0;margin:0 0 7px}
+ body.teacher-playing .hero .eyebrow,body.teacher-playing .hero .muted{display:none}
+ body.teacher-playing .hero h1{font-size:clamp(24px,2.3vw,34px);margin:0;line-height:1.15}
+ body.teacher-playing #host>.card:first-child{padding:12px 20px 14px;margin:0 0 12px}
+ body.teacher-playing #host>.card:first-child> .flex.spread:first-child{display:none}
+ body.teacher-playing #hostgame>.flex:first-child{padding:6px 12px;border-radius:14px;margin:0 0 7px}
+ body.teacher-playing #hostgame>.flex:first-child .muted{display:none}
+ body.teacher-playing #hostgame>.flex:first-child .sound-control{margin-left:auto;padding:7px 13px;font-size:14px;border-bottom-width:3px}
+ body.teacher-playing #hostgame>.flex:nth-child(2){padding:5px 12px;border-radius:13px}
+ body.teacher-playing #hosttimer{font-size:clamp(36px,3.4vw,52px)}
+ body.teacher-playing #progress{font-size:14px;margin:5px 0 7px}
+ .teacher-stage{display:grid;grid-template-columns:minmax(0,.86fr) minmax(0,1.14fr);gap:18px;align-items:stretch}
+ .teacher-reading{min-width:0;display:flex;flex-direction:column;justify-content:center}
+ .teacher-reading .extracts{margin:0;padding:8px;max-width:none;min-height:0;display:flex;justify-content:center;align-items:center;gap:7px}
+ .teacher-reading .extracts img{width:auto;max-width:100%;max-height:min(49vh,440px);object-fit:contain}
+ .teacher-reading .extracts.six{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+ .teacher-reading .extracts.six img{max-width:100%;max-height:min(22vh,175px)}
+ .teacher-reading .reading-detail{margin:3px 0 0;font-size:13px}
+ .teacher-reading .reading-detail summary{font-size:13px;padding:3px 0}
+ .teacher-quiz{min-width:0;display:flex;flex-direction:column;justify-content:center;gap:12px}
+ .teacher-quiz .question{font-size:clamp(23px,2.45vw,36px);line-height:1.23;margin:0;text-align:left}
+ .teacher-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .teacher-choice{cursor:default;min-height:clamp(70px,9vh,100px);padding:10px 12px;font-size:clamp(18px,1.7vw,25px);line-height:1.2;box-shadow:none;border-bottom-width:4px}
+ .teacher-choice .letter{flex:0 0 36px;width:36px;height:36px;font-size:19px}
+ .teacher-choice.dimmed{opacity:.48}
+ .teacher-choice.right{outline:4px solid #28b87a;outline-offset:0;opacity:1}
+ body.teacher-playing #revealbox{margin-top:9px;padding:8px 14px}
+ body.teacher-playing #revealanswer{font-size:clamp(19px,2vw,26px)}
+ body.teacher-playing #evidence{font-size:clamp(17px,1.6vw,22px);margin:4px 0}
+ body.teacher-playing #hostgame>.flex:last-child{margin-top:8px!important}
+ body.teacher-playing #hostgame>.flex:last-child button{padding:8px 12px;font-size:15px;border-bottom-width:3px}
+ body.teacher-playing #host>.card:nth-child(2){margin-top:10px;padding:12px 18px}
+ body.teacher-playing #host>.card:nth-child(2) h2{font-size:21px;margin:0 0 5px}
+ body.teacher-playing #scores .score{font-size:17px;padding:7px}
+}
+@media(min-width:850px) and (max-height:760px){
+ .teacher-reading .extracts img{max-height:39vh}
+ .teacher-reading .extracts.six img{max-height:17vh}
+ .teacher-choice{min-height:60px;font-size:19px;padding:7px 10px}
+ .teacher-quiz .question{font-size:25px}
+ body.teacher-playing #host>.card:nth-child(2){display:none}
+}
+@media(max-width:849px){
+ .teacher-stage{display:flex;flex-direction:column;gap:12px}
+ .teacher-reading .extracts{margin:8px 0;padding:8px}
+ .teacher-reading .extracts img{max-height:45vh}
+ .teacher-quiz .question{margin:8px 0 12px}
+ .teacher-choices{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .teacher-choice{min-height:76px;font-size:clamp(17px,3.4vw,23px);padding:10px;cursor:default}
+ .teacher-choice .letter{flex:0 0 34px;height:34px;font-size:18px}
+ .teacher-choice.dimmed{opacity:.5}
+}
+
 </style></head><body><main>
 <header class="hero"><span class="eyebrow">🌏 WONDERFUL WORLD · UNIT 3</span><h1>Amazing Taiwan <strong>Reading Quest!</strong></h1><p class="muted">Read. Find. Win! ✨</p></header>
 <section id="landing" class="card"><span class="tag">READ · SCAN · CHOOSE</span><h2 style="margin-top:16px">Ready to explore Taiwan?</h2><p class="muted">Read the picture. Find the answer.</p><div class="flex"><button id="create">🎓 Host a game</button><button id="showjoin" class="secondary">📱 Join a game</button></div><div class="feature"><div>📍<b>Places</b><span class="muted">Find the place</span></div><div>🚲<b>Activities</b><span class="muted">Find the action</span></div><div>🧠<b>Blog Challenge</b><span class="muted">Think deeper</span></div></div></section>
 <section id="joinbox" class="card hidden"><h2>Join your class 🚀</h2><p class="muted">Enter your room code.</p><div class="flex"><input id="code" inputmode="numeric" maxlength="6" placeholder="6-digit room code" aria-label="Room code"><input id="nickname" maxlength="24" placeholder="Your nickname" aria-label="Nickname"><button id="join">Join game</button></div><p id="joinerror" class="warning" role="alert"></p></section>
 <section id="host" class="hidden"><div class="card"><div class="flex spread"><h2>Teacher dashboard</h2><span class="pill">Room <span id="room"></span></span></div><div id="lobby"><p class="muted">Scan to join.</p><div class="hostlayout"><img id="qr" class="qr" alt="QR code for joining"><div><p id="joinurl" class="muted" style="overflow-wrap:anywhere"></p><p><b>Players: <span id="count">0</span></b></p><div class="flex"><label>Challenge<br><select id="set"><option value="places">📍 Places · 6 questions</option><option value="activities">🚲 Activities · 6 questions</option><option value="blog">🧠 Blog Challenge · 6 questions</option></select></label><label>Time<br><select id="duration"><option>20</option><option selected>30</option><option>40</option><option>45</option></select></label></div><p><button id="start">▶ Start challenge</button></p></div></div></div>
-<div id="hostgame" class="hidden"><div class="flex spread"><span class="muted">📖 Read the illustration · 🔎 Find the evidence</span><button class="sound-control" id="soundtoggle" type="button" aria-pressed="false">🔇 Sound off</button></div><div class="flex spread"><span class="pill" id="challenge"></span><span class="timer" id="hosttimer"></span></div><p class="muted" id="progress"></p><div id="hostextracts" class="extracts"></div><p class="reading-hint">🔍 Click an illustration to enlarge it</p><details class="reading-detail"><summary>Read as text</summary><div class="passage" id="hostpassage"></div></details><div class="question" id="hostquestion"></div><p class="muted"></p><div id="revealbox" class="soft hidden"><b class="success" id="revealanswer"></b><p id="evidence"></p></div><div class="flex" style="margin-top:18px"><button id="next" class="hidden">Next question →</button><button id="end" class="danger">Finish challenge</button></div></div></div><div class="card"><h2>🏆 Live scoreboard</h2><div id="scores" class="muted">Waiting for learners...</div></div></section>
+<div id="hostgame" class="hidden"><div class="flex spread"><span class="muted">📖 Read the illustration · 🔎 Find the evidence</span><button class="sound-control" id="soundtoggle" type="button" aria-pressed="false">🔇 Sound off</button></div><div class="flex spread"><span class="pill" id="challenge"></span><span class="timer" id="hosttimer"></span></div><p class="muted" id="progress"></p><div class="teacher-stage"><div class="teacher-reading"><div id="hostextracts" class="extracts"></div><details class="reading-detail"><summary>Read as text</summary><div class="passage" id="hostpassage"></div></details></div><div class="teacher-quiz"><div class="question" id="hostquestion"></div><div id="hostchoices" class="grid teacher-choices" aria-label="Answer choices for the class"></div></div></div><div id="revealbox" class="soft hidden"><b class="success" id="revealanswer"></b><p id="evidence"></p></div><div class="flex" style="margin-top:18px"><button id="next" class="hidden">Next question →</button><button id="end" class="danger">Finish challenge</button></div></div></div><div class="card"><h2>🏆 Live scoreboard</h2><div id="scores" class="muted">Waiting for learners...</div></div></section>
 <section id="player" class="hidden"><div class="card"><div class="flex spread"><span class="pill">Room <span id="playerroom"></span></span><span class="pill" id="playername"></span></div><div id="waiting" class="center"><h2 style="margin-top:22px">You're in! 🎉</h2><p class="muted">Wait for your teacher.</p></div><div id="play" class="hidden"><div class="flex spread" style="margin-top:16px"><span class="pill" id="playerchallenge"></span><span class="timer" id="playtimer"></span></div><p class="muted" id="playerprogress"></p><div id="playerextracts" class="extracts"></div><p class="reading-hint">🔍 Tap image to zoom</p><details class="reading-detail"><summary>Read as text</summary><div class="passage" id="playerpassage"></div></details><div class="question" id="playerquestion"></div><div id="choices" class="grid"></div><p id="feedback" class="status center" aria-live="polite"></p></div><div id="finish" class="hidden center"><h2 style="margin-top:22px">🌟 Challenge complete!</h2><p id="myscore"></p><p class="muted">See the scoreboard!</p></div></div></section>
 <div id="confetti" class="celebration" aria-hidden="true"></div><div id="zoom" class="zoom hidden" role="dialog" aria-label="Enlarged reading extract"><button id="closezoom" type="button">✕ Close</button><img id="zoomimage" alt="Enlarged travel blog extract"></div><footer>Wonderful World 🌏</footer></main><script src="/socket.io/socket.io.js"></script><script>
 const $=id=>document.getElementById(id),socket=io();let role='',room='',playerId='',lastState=null,answered=false,questionKey='';const show=(id,on)=>$(id).classList.toggle('hidden',!on);const query=new URLSearchParams(location.search);
@@ -156,8 +213,27 @@ function escapeHTML(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':
 const extractAlt={mountain:'Taiwan has high mountains. Yushan is the highest mountain. The views are so beautiful!',beach:'The beaches in Taiwan are great for swimming, surfing, and relaxing in the sun!',market:'Markets are so much fun! You can find tasty snacks, clothes, games, and many interesting things.',temple:'There are many beautiful temples in Taiwan. People go there to pray and wish for good luck.',city:'Taipei is the capital city. It has tall buildings, great shops, and lots of exciting places to visit!',river:'Rivers make Taiwan even more beautiful. You can walk, bike, or just enjoy the nice view.'};
 function showExtracts(id,images){const el=$(id),names=(images||[]).filter(x=>Object.prototype.hasOwnProperty.call(extractAlt,x));const signature=names.join('|');if(el.dataset.signature===signature)return;el.dataset.signature=signature;el.classList.toggle('six',names.length>2);el.replaceChildren();for(const name of names){const img=document.createElement('img');img.src='/images/'+name+'.png';img.alt=extractAlt[name];img.loading='eager';img.title='Tap to enlarge';img.onclick=()=>{$('zoomimage').src=img.src;$('zoomimage').alt=img.alt;show('zoom',true)};el.appendChild(img)}}
 $('closezoom').onclick=()=>show('zoom',false);$('zoom').onclick=e=>{if(e.target===$('zoom'))show('zoom',false)};document.addEventListener('keydown',e=>{if(e.key==='Escape')show('zoom',false)});
+function renderHostChoices(s){
+ const area=$('hostchoices');
+ const signature=String(s.round)+'-'+String(s.index)+'-'+String(s.set);
+ if(area.dataset.question!==signature){
+  area.dataset.question=signature;
+  area.replaceChildren();
+  (s.choices||[]).forEach((choice,i)=>{
+   const card=document.createElement('div');card.className='choice teacher-choice';
+   const letter=document.createElement('span');letter.className='letter';letter.textContent='ABCD'[i]||String(i+1);
+   const label=document.createElement('span');label.textContent=choice;
+   card.append(letter,label);area.appendChild(card);
+  });
+ }
+ Array.from(area.children).forEach((card,i)=>{
+  const revealed=s.phase==='reveal';
+  card.classList.toggle('right',revealed&&i===s.answer);
+  card.classList.toggle('dimmed',revealed&&i!==s.answer);
+ });
+}
 function render(s){if(s.code!==room)return;lastState=s;const phaseKey=s.round+'-'+s.index;const isNewQuestion=s.phase==='question'&&lastAnimatedQuestion!==phaseKey;const isNewReveal=s.phase==='reveal'&&lastRevealKey!==phaseKey;const isNewFinish=s.phase==='finished'&&lastFinishKey!==String(s.round);if(isNewQuestion){lastAnimatedQuestion=phaseKey;playCue('start')}if(isNewReveal){lastRevealKey=phaseKey;playCue('reveal');celebrate()}if(isNewFinish){lastFinishKey=String(s.round);playCue('reveal');celebrate()}const rank=[...s.players].sort((a,b)=>b.score-a.score);$('scores').innerHTML=rank.map((p,i)=>`<div class="score"><span>${i+1}. ${escapeHTML(p.name)} ${p.connected?'':'(offline)'}</span><b>${p.score} pts · ${p.correct} correct</b></div>`).join('')||'<p class="muted">Waiting for learners...</p>';
-if(role==='host'){$('count').textContent=s.players.filter(p=>p.connected).length;show('lobby',s.phase==='lobby'||s.phase==='finished');show('hostgame',s.phase==='question'||s.phase==='reveal');$('challenge').textContent=s.setTitle;$('hosttimer').textContent=s.remaining+'s';$('hosttimer').classList.toggle('low',s.remaining<=10);$('progress').textContent=`Question ${s.index+1} of ${s.total} · ${s.answered} answered`;$('hostpassage').textContent=s.passage;showExtracts('hostextracts',s.images);$('hostquestion').textContent=s.prompt;if(isNewQuestion){animateOnce($('hostquestion'));animateOnce($('hostextracts'))}show('revealbox',s.phase==='reveal');show('next',s.phase==='reveal');if(s.phase==='reveal'){$('revealanswer').textContent='Answer: '+s.choices[s.answer];$('evidence').textContent='Evidence: '+s.evidence;if(isNewReveal){$('revealbox').classList.remove('reveal-pop');void $('revealbox').offsetWidth;$('revealbox').classList.add('reveal-pop')}}if(s.phase==='finished')$('lobby').querySelector('p').textContent='Challenge complete!'}
+if(role==='host'){document.body.classList.toggle('teacher-playing',s.phase==='question'||s.phase==='reveal');$('count').textContent=s.players.filter(p=>p.connected).length;show('lobby',s.phase==='lobby'||s.phase==='finished');show('hostgame',s.phase==='question'||s.phase==='reveal');$('challenge').textContent=s.setTitle;$('hosttimer').textContent=s.remaining+'s';$('hosttimer').classList.toggle('low',s.remaining<=10);$('progress').textContent=`Question ${s.index+1} of ${s.total} · ${s.answered} answered`;$('hostpassage').textContent=s.passage;showExtracts('hostextracts',s.images);$('hostquestion').textContent=s.prompt;renderHostChoices(s);if(isNewQuestion){animateOnce($('hostquestion'));animateOnce($('hostextracts'))}show('revealbox',s.phase==='reveal');show('next',s.phase==='reveal');if(s.phase==='reveal'){$('revealanswer').textContent='Answer: '+s.choices[s.answer];$('evidence').textContent='Evidence: '+s.evidence;if(isNewReveal){$('revealbox').classList.remove('reveal-pop');void $('revealbox').offsetWidth;$('revealbox').classList.add('reveal-pop')}}if(s.phase==='finished')$('lobby').querySelector('p').textContent='Challenge complete!'}
 if(role==='player'){show('waiting',s.phase==='lobby');show('play',s.phase==='question'||s.phase==='reveal');show('finish',s.phase==='finished');$('playerchallenge').textContent=s.setTitle;$('playtimer').textContent=s.remaining+'s';$('playtimer').classList.toggle('low',s.remaining<=10);$('playerprogress').textContent=`Question ${s.index+1} of ${s.total}`;$('playerpassage').textContent=s.passage;showExtracts('playerextracts',s.images);$('playerquestion').textContent=s.prompt;if(isNewQuestion){animateOnce($('playerquestion'));animateOnce($('playerextracts'))}const me=s.players.find(p=>p.name===$('playername').textContent);$('myscore').textContent=me?`${me.score} points · ${me.correct} correct answers`:'';const key=s.round+'-'+s.index;if(questionKey!==key){questionKey=key;answered=false;$('feedback').textContent='';$('choices').innerHTML='';s.choices.forEach((choice,i)=>{const b=document.createElement('button');b.className='choice';b.innerHTML=`<span class="letter">${'ABCD'[i]}</span><span>${escapeHTML(choice)}</span>`;b.onclick=()=>{if(answered||lastState.phase!=='question')return;answered=true;b.classList.add('chosen');playCue('answer');socket.emit('answer',{choice:i},r=>{if(r.error){$('feedback').textContent=r.error;return}$('feedback').textContent=r.correct?'✅ Great scanning!':'Answer saved. Look for the evidence!';$('feedback').className='status center '+(r.correct?'success':'warning')})};$('choices').appendChild(b)})}Array.from($('choices').children).forEach((b,i)=>{b.disabled=answered||s.phase==='reveal';b.classList.toggle('right',s.phase==='reveal'&&i===s.answer)});if(s.phase==='reveal')$('feedback').textContent='Answer: '+s.choices[s.answer]+' · '+s.evidence}}
 
 // Original, synthesized sound cues; no external audio files or autoplay.
